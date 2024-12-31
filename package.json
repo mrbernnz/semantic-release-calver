@@ -1,0 +1,12 @@
+{
+  "name": "semantic-release-calver",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@types/node": "22.10.2",
+    "@types/semantic-release": "20.0.6",
+    "date-fns": "4.1.0",
+    "semantic-release": "24.2.0"
+  }
+}
