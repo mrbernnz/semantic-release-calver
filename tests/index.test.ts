@@ -1,26 +1,40 @@
-import {calculateNextVersion, generateNotes, prepare} from '../src/index';
-import {PluginContext} from '../src/types';
+import {Signale} from 'signale';
+import {generateNotes, prepare} from '../src/index';
+import {GenerateNotesContext, PrepareContext} from '../src/types';
 
-describe('Versioning Utilities', () => {
-  it('calculates next version for a new month', () => {
-    const result = calculateNextVersion('2024.11.3');
-    expect(result).toMatch(/^2024\.12\.0$/);
-  });
+type Context = GenerateNotesContext | PrepareContext;
 
-  it('increments minor version for the same month', () => {
-    const result = calculateNextVersion('2024.12.3');
-    expect(result).toBe('2024.12.4');
-  });
-
-  it('handles invalid last version gracefully', () => {
-    const result = calculateNextVersion('invalid.version');
-    expect(result).toMatch(/^\d{4}\.\d{2}\.0$/);
-  });
-});
-
-describe('Plugin Functions', () => {
-  const mockLogger = {log: jest.fn(), error: jest.fn()};
-  const mockContext: PluginContext = {
+describe('Calver Plugin', () => {
+  const mockLogger: jest.Mocked<Signale<'error' | 'success' | 'warn' | 'log'>> = {
+    log: jest.fn(),
+    error: jest.fn(),
+    success: jest.fn(),
+    warn: jest.fn(),
+    config: jest.fn().mockReturnThis(),
+    scope: jest.fn().mockReturnThis(),
+    unscope: jest.fn().mockReturnThis(),
+    time: jest.fn(),
+    timeEnd: jest.fn(),
+    start: jest.fn(),
+    pause: jest.fn(),
+    complete: jest.fn(),
+    fatal: jest.fn(),
+    info: jest.fn(),
+    note: jest.fn(),
+    debug: jest.fn(),
+    await: jest.fn(),
+    star: jest.fn(),
+    watch: jest.fn(),
+    pending: jest.fn(),
+    disable: jest.fn(),
+    enable: jest.fn(),
+    isEnabled: jest.fn(),
+    addSecrets: jest.fn(),
+    clearSecrets: jest.fn(),
+    fav: jest.fn()
+  };
+  const mockPluginConfig = {};
+  const mockContext: Context = {
     lastRelease: {
       version: '2024.12.3',
       gitTag: '',
@@ -31,23 +45,72 @@ describe('Plugin Functions', () => {
     nextRelease: {
       notes: 'Release notes',
       version: '',
-      type: 'prerelease',
+      type: 'minor',
       channel: '',
       gitTag: '',
       gitHead: '',
       name: ''
     },
-    logger: mockLogger
+    logger: mockLogger,
+    commits: [],
+    releases: [],
+    env: {},
+    envCi: {
+      isCi: true,
+      commit: '',
+      branch: 'main'
+    },
+    branch: {name: ''},
+    branches: [],
+    stdout: process.stdout,
+    stderr: process.stderr
   };
 
-  it('prepare sets next version correctly', async () => {
-    await prepare({context: mockContext});
-    expect(mockContext.nextRelease.version).toMatch(/^2024\.12\.\d+$/);
-    expect(mockLogger.log).toHaveBeenCalledWith(expect.stringMatching(/CalVer calculated/));
+  describe('when executing the generate notes function', () => {
+    it('generateNotes returns release notes', async () => {
+      const notes = await generateNotes(mockPluginConfig, mockContext);
+      expect(notes).toBe('Release notes');
+    });
   });
 
-  it('generateNotes returns release notes', async () => {
-    const notes = await generateNotes({context: mockContext});
-    expect(notes).toBe('Release notes');
+  describe('when executing the prepare function', () => {
+    const date = new Date();
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+
+    it('increments minor version for the same month', async () => {
+      mockContext.lastRelease.version = `${year}.${month}.3`;
+
+      await prepare(mockPluginConfig, mockContext);
+
+      expect(mockContext.nextRelease.version).toBe(`${year}.${month}.4`);
+    });
+
+    it('calculates next version for a new month', async () => {
+      mockContext.lastRelease.version = '2024.11.3';
+
+      await prepare(mockPluginConfig, mockContext);
+
+      const re = new RegExp(`${year}\.${month}.0`);
+
+      expect(mockContext.nextRelease.version).toMatch(re);
+    });
+
+    it('handles invalid last version gracefully', async () => {
+      mockContext.lastRelease.version = 'invalid.version';
+
+      await prepare(mockPluginConfig, mockContext);
+
+      expect(mockContext.nextRelease.version).toMatch(/^\d{4}\.\d{2}\.0$/);
+    });
+
+    it('prepare sets next version correctly', async () => {
+      await prepare(mockPluginConfig, mockContext);
+
+      const re = new RegExp(`${year}\.${month}.\\d+$`);
+
+      expect(mockContext.nextRelease.version).toMatch(re);
+      expect(mockLogger.log).toHaveBeenCalledWith(expect.stringMatching(/CalVer calculated/));
+    });
   });
 });

@@ -1,12 +1,12 @@
 import {format} from 'date-fns';
-import {PluginConfig, PluginContext} from './types';
+import {GenerateNotesContext, PluginConfig, PrepareContext} from './types';
 
 /**
  * Utility function to calculate the next version following CalVer (yyyy.MM).
  * @param lastVersion - The last version string (e.g., "2024.12.3").
  * @returns The next version string.
  */
-export const calculateNextVersion = (lastVersion: string): string => {
+const calculateNextVersion = (lastVersion: string): string => {
   const formattedDate = format(new Date(), 'yyyy.MM');
 
   const [_, lastMonth, minor] = lastVersion.split('.');
@@ -21,12 +21,10 @@ export const calculateNextVersion = (lastVersion: string): string => {
  * @param context - Plugin context containing release data.
  * @returns The release notes or undefined.
  */
-export const generateNotes = async ({
-  context
-}: {
-  pluginConfig?: PluginConfig;
-  context: PluginContext;
-}): Promise<string | undefined> => {
+export const generateNotes = async (
+  pluginConfig: PluginConfig,
+  context: GenerateNotesContext
+): Promise<string | undefined> => {
   return context.nextRelease?.notes;
 };
 
@@ -34,14 +32,12 @@ export const generateNotes = async ({
  * Prepares the next release by calculating the next version.
  * @param context - Plugin context containing release data.
  */
-export const prepare = async ({
-  context
-}: {
-  pluginConfig?: PluginConfig;
-  context: PluginContext;
-}): Promise<void> => {
+export const prepare = async (
+  pluginConfig: PluginConfig,
+  context: PrepareContext
+): Promise<void> => {
   try {
-    const lastVersion = context.lastRelease?.version ?? '1970.01.-1';
+    const lastVersion = context.lastRelease?.version;
     const newVersion = calculateNextVersion(lastVersion);
 
     if (context.nextRelease) {
