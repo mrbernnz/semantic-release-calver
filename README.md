@@ -1,6 +1,6 @@
-# semantic-release-calver
+# @mrbernnz/semantic-release-calver
 
-A plugin for semantic-release that supports Calendar Versioning (CalVer) for automated release management. CalVer uses date-based versioning, making it ideal for projects with frequent releases.
+A plugin for semantic-release that supports Calendar Versioning ([CalVer](https://calver.org)) for automated release management. CalVer uses date-based versioning, making it ideal for projects with frequent releases.
 
 ## Features
 
@@ -16,10 +16,10 @@ Install the package via npm or yarn:
 
 ```sh
 # Using npm
-npm install semantic-release-calver --save-dev
+npm install @mrbernnz/semantic-release-calver --save-dev
 
 # Using yarn
-yarn add semantic-release-calver --dev
+yarn add @mrbernnz/semantic-release-calver --dev
 ```
 
 ## Usage
@@ -32,11 +32,11 @@ To use semantic-release-calver, configure it as a plugin in your release configu
 module.exports = {
   branches: ['main'],
   plugins:
-    'semantic-release-calver',
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
     '@semantic-release/git',
-    '@semantic-release/npm'
+    '@semantic-release/npm',
+    '@mrbernnz/semantic-release-calver'
 
 };
 ```
@@ -50,23 +50,16 @@ With the configuration above, semantic-release-calver will:
 
 ## API Reference
 
-semantic-release-calver Plugin
-
-Parameters
-
-### Parameter Type Required Description
-
-calver string Yes The Calendar Versioning format.
-tagPrefix string No Prefix for the release tag.
+@mrbernnz/semantic-release-calver plugin
 
 ### Returns
 
-A string representing the calculated version (e.g., 2024.01.01.0).
+A string representing the calculated version (e.g., 2024.01.0).
 
 Example
 
 ```js
-const calverPlugin = require('semantic-release-calver');
+const calverPlugin = require('@mrbernnz/semantic-release-calver');
 
 const version = calverPlugin.calculateNextVersion({
   lastVersion: '2023.12.2'
@@ -105,7 +98,7 @@ NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
 ## Troubleshooting Guide
 
-Common Issues
+### Common Issues
 
 1. Plugin Not Executing:
    - Verify that the plugin is correctly configured in the plugins array of your release.config.js.
