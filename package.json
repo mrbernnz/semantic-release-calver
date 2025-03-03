@@ -21,7 +21,7 @@
   "files": ["dist/**/*"],
   "peerDependencies": {
     "date-fns": "^2.30.0",
-    "semantic-release": "^19.0.0"
+    "semantic-release": ">=19.0.0"
   },
   "devDependencies": {
     "@babel/core": "7.26.0",
