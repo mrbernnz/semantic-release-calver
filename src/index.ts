@@ -6,7 +6,7 @@ import {
   PluginConfig,
   PrepareContext
 } from './types';
-import {determineFormat, invalidVersion} from './utils';
+import {determineFormat, getVersionSegments, invalidVersion} from './utils';
 
 /**
  * Utility function to calculate the next version following CalVer (i.e. YYYY.0M.MICRO).
@@ -21,7 +21,7 @@ const calculateNextVersion = ({lastVersion, versionFormat}: CalculateNextVersion
     return `${formattedDate}.0`;
   }
 
-  const versionSegments = lastVersion.split('.');
+  const versionSegments = getVersionSegments(lastVersion);
 
   if (!lastVersion || invalidVersion(lastVersion) || versionSegments.length < 3) {
     throw new SemanticReleaseError(

@@ -1,5 +1,5 @@
 import {format} from 'date-fns';
-import {determineFormat, invalidVersion} from '../src/utils';
+import {determineFormat, getVersionSegments, invalidVersion} from '../src/utils';
 
 describe('CalVer Plugin Utils', () => {
   describe('isInvalidVersion', () => {
@@ -43,5 +43,16 @@ describe('CalVer Plugin Utils', () => {
         expect(determineFormat({formattedDate, lastMinor, versionFormat})).toBe(expected);
       }
     );
+  });
+
+  describe('getVersionSegments', () => {
+    it.each`
+      version         | expected
+      ${''}           | ${[]}
+      ${'2025.02.11'} | ${['2025', '02', '11']}
+      ${'2025.02_11'} | ${['2025', '02', '11']}
+    `('should convert version into correct number of segments', ({version, expected}) => {
+      expect(getVersionSegments(version)).toEqual(expected);
+    });
   });
 });

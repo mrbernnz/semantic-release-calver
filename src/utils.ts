@@ -45,3 +45,8 @@ export const determineFormat = ({
 
   return `${formattedDate}.${lastMinor + 1}`;
 };
+
+export const getVersionSegments = (version: string) => {
+  if (!version) return [];
+  return version.split(/[._]/);
+};
