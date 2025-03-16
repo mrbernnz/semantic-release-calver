@@ -1,17 +1,8 @@
 import SemanticReleaseError from '@semantic-release/error';
 import {format} from 'date-fns';
-import semver from 'semver';
-import {GenerateNotesContext, PluginConfig, PrepareContext} from './types';
+import {GenerateNotesContext, PluginConfig, PrepareContext, VersionFormat} from './types';
+import {invalidVersion} from './utils';
 
-/**
- * Validates whether a version string adheres to SemVer or CalVer specification.
- * @param version - The version string to validate.
- * @returns `true` if valid version, otherwise `false`.
- */
-const isValidVersion = (version: string | undefined): boolean => {
-  if (version === undefined) return true;
-  return Boolean(semver.valid(version)) || /^\d{4}\.\d{2}(\.\d+)?$/.test(version);
-};
 
 /**
  * Utility function to calculate the next version following CalVer (yyyy.MM).
@@ -28,7 +19,7 @@ const calculateNextVersion = (lastVersion: string): string => {
 
   const versionSegments = lastVersion.split('.');
 
-  if (!lastVersion || !isValidVersion(lastVersion) || versionSegments.length < 3) {
+  if (!lastVersion || invalidVersion(lastVersion) || versionSegments.length < 3) {
     throw new SemanticReleaseError(
       'Invalid CalVer Format',
       'EINVALIDCALVER',
@@ -65,7 +56,7 @@ export const prepare = async (
   try {
     const lastVersion = context.lastRelease?.version;
 
-    if (!isValidVersion(lastVersion)) {
+    if (invalidVersion(lastVersion)) {
       throw new SemanticReleaseError(
         'Invalid Version Format',
         'EINVALIDVERSION',
