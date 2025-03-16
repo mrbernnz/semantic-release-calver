@@ -1,4 +1,5 @@
 import semver from 'semver';
+import {DetermineFormatArgs} from './types';
 
 /**
  * Validates whether a version string adheres to SemVer or CalVer specification.
@@ -31,4 +32,16 @@ export const invalidVersion = (version: string | undefined): boolean => {
   }
 
   return false;
+};
+
+export const determineFormat = ({
+  formattedDate,
+  lastMinor,
+  versionFormat
+}: DetermineFormatArgs): string => {
+  if (versionFormat === 'YYYY.0M_MICRO') {
+    return `${formattedDate}_${String(lastMinor + 1).padStart(2, '0')}`;
+  }
+
+  return `${formattedDate}.${lastMinor + 1}`;
 };

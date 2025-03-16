@@ -1,16 +1,20 @@
 import SemanticReleaseError from '@semantic-release/error';
 import {format} from 'date-fns';
-import {GenerateNotesContext, PluginConfig, PrepareContext, VersionFormat} from './types';
-import {invalidVersion} from './utils';
-
+import {
+  CalculateNextVersionArgs,
+  GenerateNotesContext,
+  PluginConfig,
+  PrepareContext
+} from './types';
+import {determineFormat, invalidVersion} from './utils';
 
 /**
- * Utility function to calculate the next version following CalVer (yyyy.MM).
+ * Utility function to calculate the next version following CalVer (i.e. YYYY.0M.MICRO).
  * @param lastVersion - The last version string (e.g., "2024.12.3").
  * @returns The next version string.
  * @throws Error if the lastVersion is invalid.
  */
-const calculateNextVersion = (lastVersion: string): string => {
+const calculateNextVersion = ({lastVersion, versionFormat}: CalculateNextVersionArgs): string => {
   const formattedDate = format(new Date(), 'yyyy.MM');
 
   if (!lastVersion) {
@@ -30,7 +34,7 @@ const calculateNextVersion = (lastVersion: string): string => {
   const [, lastMonth, minor] = versionSegments;
   const lastMinor = formattedDate.includes(lastMonth) ? Number(minor) || 0 : -1;
 
-  return `${formattedDate}.${lastMinor + 1}`;
+  return determineFormat({formattedDate, lastMinor, versionFormat});
 };
 
 /**
@@ -50,7 +54,7 @@ export const generateNotes = async (
  * @param context - Plugin context containing release data.
  */
 export const prepare = async (
-  pluginConfig: PluginConfig,
+  pluginConfig: PluginConfig = {versionFormat: 'YYYY.0M.MICRO'},
   context: PrepareContext
 ): Promise<void> => {
   try {
@@ -64,7 +68,10 @@ export const prepare = async (
       );
     }
 
-    const newVersion = calculateNextVersion(lastVersion);
+    const newVersion = calculateNextVersion({
+      lastVersion,
+      versionFormat: pluginConfig.versionFormat
+    });
 
     if (context.nextRelease) {
       context.nextRelease.version = newVersion;

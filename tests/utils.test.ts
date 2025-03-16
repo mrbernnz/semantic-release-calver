@@ -1,4 +1,5 @@
-import {invalidVersion} from '../src/utils';
+import {format} from 'date-fns';
+import {determineFormat, invalidVersion} from '../src/utils';
 
 describe('CalVer Plugin Utils', () => {
   describe('isInvalidVersion', () => {
@@ -25,5 +26,22 @@ describe('CalVer Plugin Utils', () => {
     `('should validate "$version" as "$expected"', async ({version, expected}) => {
       expect(invalidVersion(version)).toEqual(expected);
     });
+  });
+
+  describe('determineFormat', () => {
+    const formattedDate = format(new Date(), 'yyyy.MM');
+
+    it.each`
+      formattedDate    | lastMinor | versionFormat      | expected
+      ${formattedDate} | ${2}      | ${'YYYY.0M.MICRO'} | ${`${formattedDate}.3`}
+      ${formattedDate} | ${9}      | ${'YYYY.0M.MICRO'} | ${`${formattedDate}.10`}
+      ${formattedDate} | ${2}      | ${'YYYY.0M_MICRO'} | ${`${formattedDate}_03`}
+      ${formattedDate} | ${9}      | ${'YYYY.0M_MICRO'} | ${`${formattedDate}_10`}
+    `(
+      'should give next version based on $versionFormat',
+      ({formattedDate, lastMinor, versionFormat, expected}) => {
+        expect(determineFormat({formattedDate, lastMinor, versionFormat})).toBe(expected);
+      }
+    );
   });
 });
