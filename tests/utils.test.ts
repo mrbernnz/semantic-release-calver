@@ -1,35 +1,36 @@
-import {format} from 'date-fns';
-import {determineFormat, getVersionSegments, invalidVersion} from '../src/utils';
+import {VersionManager} from '../src/utils';
 
 describe('CalVer Plugin Utils', () => {
-  describe('isInvalidVersion', () => {
+  const versionManager = new VersionManager('YYYY.0M.MICRO');
+
+  describe('isValidVersion', () => {
     it.each`
       version                    | expected
-      ${''}                      | ${true}
-      ${'random.version.string'} | ${true}
-      ${'2025.02'}               | ${true}
-      ${'2025.02_02.a'}          | ${true}
-      ${'9999.02.1'}             | ${true}
-      ${'2025.2.1'}              | ${true}
-      ${'2025.02.1'}             | ${false}
-      ${'2025.02.01'}            | ${true}
-      ${'2025.02.10'}            | ${false}
-      ${'2025.02.100'}           | ${false}
-      ${'2025.02.9999'}          | ${false}
-      ${'2025.02.10000'}         | ${true}
-      ${'2025.02_1'}             | ${true}
-      ${'2025.02_01'}            | ${false}
-      ${'2025.02_10'}            | ${false}
-      ${'2025.02_100'}           | ${false}
-      ${'2025.02_9999'}          | ${false}
-      ${'2025.02_10000'}         | ${true}
+      ${''}                      | ${false}
+      ${'random.version.string'} | ${false}
+      ${'2025.02'}               | ${false}
+      ${'2025.02_02.a'}          | ${false}
+      ${'9999.02.1'}             | ${false}
+      ${'2025.2.1'}              | ${false}
+      ${'2025.02.1'}             | ${true}
+      ${'2025.02.01'}            | ${false}
+      ${'2025.02.10'}            | ${true}
+      ${'2025.02.100'}           | ${true}
+      ${'2025.02.9999'}          | ${true}
+      ${'2025.02.10000'}         | ${false}
+      ${'2025.02_1'}             | ${false}
+      ${'2025.02_01'}            | ${true}
+      ${'2025.02_10'}            | ${true}
+      ${'2025.02_100'}           | ${true}
+      ${'2025.02_9999'}          | ${true}
+      ${'2025.02_10000'}         | ${false}
     `('should validate "$version" as "$expected"', async ({version, expected}) => {
-      expect(invalidVersion(version)).toEqual(expected);
+      expect(versionManager.isValidVersion(version)).toEqual(expected);
     });
   });
 
   describe('determineFormat', () => {
-    const formattedDate = format(new Date(), 'yyyy.MM');
+    const formattedDate = versionManager['getFormattedDate']();
 
     it.each`
       formattedDate    | lastMinor | versionFormat      | expected
@@ -40,7 +41,9 @@ describe('CalVer Plugin Utils', () => {
     `(
       'should give next version based on $versionFormat',
       ({formattedDate, lastMinor, versionFormat, expected}) => {
-        expect(determineFormat({formattedDate, lastMinor, versionFormat})).toBe(expected);
+        expect(
+          versionManager['determineFormat']({formattedDate, lastMinor, versionFormat})
+        ).toBe(expected);
       }
     );
   });
@@ -52,7 +55,7 @@ describe('CalVer Plugin Utils', () => {
       ${'2025.02.11'} | ${['2025', '02', '11']}
       ${'2025.02_11'} | ${['2025', '02', '11']}
     `('should convert version into correct number of segments', ({version, expected}) => {
-      expect(getVersionSegments(version)).toEqual(expected);
+      expect(versionManager['getVersionSegments'](version)).toEqual(expected);
     });
   });
 });

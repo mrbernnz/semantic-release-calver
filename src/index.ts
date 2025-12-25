@@ -1,41 +1,11 @@
 import SemanticReleaseError from '@semantic-release/error';
 import {format} from 'date-fns';
 import {
-  CalculateNextVersionArgs,
   GenerateNotesContext,
   PluginConfig,
   PrepareContext
 } from './types';
-import {determineFormat, getVersionSegments, invalidVersion} from './utils';
-
-/**
- * Utility function to calculate the next version following CalVer (i.e. YYYY.0M.MICRO).
- * @param lastVersion - The last version string (e.g., "2024.12.3").
- * @returns The next version string.
- * @throws Error if the lastVersion is invalid.
- */
-const calculateNextVersion = ({lastVersion, versionFormat}: CalculateNextVersionArgs): string => {
-  const formattedDate = format(new Date(), 'yyyy.MM');
-
-  if (!lastVersion) {
-    return `${formattedDate}.0`;
-  }
-
-  const versionSegments = getVersionSegments(lastVersion);
-
-  if (!lastVersion || invalidVersion(lastVersion) || versionSegments.length < 3) {
-    throw new SemanticReleaseError(
-      'Invalid CalVer Format',
-      'EINVALIDCALVER',
-      `The version "${lastVersion}" does not match the CalVer pattern.`
-    );
-  }
-
-  const [, lastMonth, minor] = versionSegments;
-  const lastMinor = formattedDate.includes(lastMonth) ? Number(minor) || 0 : -1;
-
-  return determineFormat({formattedDate, lastMinor, versionFormat});
-};
+import {VersionManager} from './versionManager';
 
 /**
  * Generates release notes from the context.
@@ -59,8 +29,9 @@ export const prepare = async (
 ): Promise<void> => {
   try {
     const lastVersion = context.lastRelease?.version;
+    const versionManager = new VersionManager(pluginConfig.versionFormat);
 
-    if (invalidVersion(lastVersion)) {
+    if (!versionManager.isValidVersion(lastVersion)) {
       throw new SemanticReleaseError(
         'Invalid Version Format',
         'EINVALIDVERSION',
@@ -68,10 +39,7 @@ export const prepare = async (
       );
     }
 
-    const newVersion = calculateNextVersion({
-      lastVersion,
-      versionFormat: pluginConfig.versionFormat
-    });
+    const newVersion = versionManager.calculateNextVersion(lastVersion);
 
     if (context.nextRelease) {
       context.nextRelease.version = newVersion;
