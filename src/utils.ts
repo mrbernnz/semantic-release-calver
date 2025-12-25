@@ -1,10 +1,10 @@
 import semver from 'semver';
-import {DetermineFormatArgs} from './types';
+import {DetermineFormatArgs, VersionFormat} from './types';
 
 export class VersionManager {
-  private versionFormat: string;
+  private versionFormat: VersionFormat;
 
-  constructor(versionFormat: string) {
+  constructor(versionFormat: VersionFormat) {
     this.versionFormat = versionFormat;
   }
 
@@ -57,7 +57,9 @@ export class VersionManager {
     const versionSegments = this.getVersionSegments(lastVersion);
 
     if (!lastVersion || !this.isValidVersion(lastVersion) || versionSegments.length < 3) {
-      throw new Error(`Invalid CalVer Format: The version "${lastVersion}" does not match the CalVer pattern.`);
+      throw new Error(
+        `Invalid CalVer Format: The version "${lastVersion}" does not match the CalVer pattern.`
+      );
     }
 
     const [, lastMonth, minor] = versionSegments;

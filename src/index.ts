@@ -1,11 +1,6 @@
 import SemanticReleaseError from '@semantic-release/error';
-import {format} from 'date-fns';
-import {
-  GenerateNotesContext,
-  PluginConfig,
-  PrepareContext
-} from './types';
-import {VersionManager} from './versionManager';
+import {GenerateNotesContext, PluginConfig, PrepareContext} from './types';
+import {VersionManager} from './utils';
 
 /**
  * Generates release notes from the context.
