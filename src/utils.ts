@@ -51,7 +51,7 @@ export class VersionManager {
     const formattedDate = this.getFormattedDate();
 
     if (!lastVersion) {
-      return `${formattedDate}.0`;
+      return `${formattedDate}.1`;
     }
 
     const versionSegments = this.getVersionSegments(lastVersion);
