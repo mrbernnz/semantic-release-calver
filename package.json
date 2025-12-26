@@ -1,6 +1,6 @@
 {
   "name": "@mrbernnz/semantic-release-calver",
-  "version": "0.0.1",
+  "version": "0.3.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "license": "MIT",
@@ -18,7 +18,7 @@
     "type": "git",
     "url": "git+https://github.com/mrbernnz/semantic-release-calver.git"
   },
-  "files": ["dist/**/*"],
+  "files": ["dist"],
   "peerDependencies": {
     "date-fns": "^2.30.0",
     "semantic-release": "^19.0.0"
