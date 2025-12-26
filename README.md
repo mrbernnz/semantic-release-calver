@@ -4,7 +4,7 @@ A plugin for semantic-release that supports Calendar Versioning ([CalVer](https:
 
 ## Features
 
-- 📅 CalVer Support: Adheres to the Calendar Versioning format (e.g. YYYY.MM.MINOR).
+- 📅 CalVer Support: Adheres to the Calendar Versioning format (e.g., YYYY.MM.MINOR).
 - 🔧 Flexible Configuration: Customize versioning patterns to fit your project needs.
 - ✅ Integration Ready: Works seamlessly with semantic-release workflows.
 - ⚙️ TypeScript Support: Fully typed for better developer experience.
@@ -26,18 +26,20 @@ yarn add @mrbernnz/semantic-release-calver --dev
 
 ### Basic Setup
 
-To use semantic-release-calver, configure it as a plugin in your release configuration file (e.g., release.config.js):
+To use semantic-release-calver, add it as the **first plugin** in your semantic-release configuration file (e.g., `.releaserc.json` or `release.config.js`) to override the default SemVer versioning:
 
 ```js
 module.exports = {
   branches: ['main'],
-  plugins:
+  plugins: [
+    '@mrbernnz/semantic-release-calver',
+    '@semantic-release/commit-analyzer',
     '@semantic-release/release-notes-generator',
     '@semantic-release/changelog',
     '@semantic-release/git',
     '@semantic-release/npm',
-    '@mrbernnz/semantic-release-calver'
-
+    '@semantic-release/github'
+  ]
 };
 ```
 
@@ -45,8 +47,25 @@ module.exports = {
 
 With the configuration above, semantic-release-calver will:
 
-1. Generate a version in the specified CalVer format.
-2. Automatically create and publish releases using semantic-release.
+1. Generate a version in the specified CalVer format (default: `YYYY.0M.MICRO`).
+2. Override the default SemVer versioning behavior.
+3. Automatically create and publish releases using semantic-release.
+
+### Custom Version Format
+
+You can customize the CalVer format by passing options to the plugin in your config:
+
+```js
+module.exports = {
+  plugins: [
+    [
+      '@mrbernnz/semantic-release-calver',
+      { versionFormat: 'YYYY.0M_MICRO' } // or 'YYYY.0M.MICRO'
+    ],
+    // other plugins...
+  ]
+};
+```
 
 ## API Reference
 
@@ -54,9 +73,9 @@ With the configuration above, semantic-release-calver will:
 
 ### Returns
 
-A string representing the calculated version (e.g., 2024.01.0).
+A string representing the calculated version (e.g., `2024.01.0`).
 
-Example
+Example:
 
 ```js
 const calverPlugin = require('@mrbernnz/semantic-release-calver');
@@ -70,7 +89,7 @@ console.log(version); // Outputs: '2024.01.0'
 
 ## Integration Examples
 
-GitHub Actions
+### GitHub Actions
 
 Here’s an example workflow to use semantic-release-calver in a GitHub Actions pipeline:
 
@@ -78,32 +97,47 @@ Here’s an example workflow to use semantic-release-calver in a GitHub Actions 
 name: Release
 
 on:
-push:
-branches: - main
+  push:
+    branches:
+      - main
 
 jobs:
-release:
-runs-on: ubuntu-latest
-steps: - name: Checkout repository
-uses: actions/checkout@v3 - name: Set up Node.js
-uses: actions/setup-node@v3
-with:
-node-version: 16 - name: Install dependencies
-run: npm install - name: Run semantic-release
-run: npx semantic-release
-env:
-GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run semantic-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GIT_FETCH_EXTRA_ARGS: '--prune --tags'
+        run: npx semantic-release
 ```
 
 ## Troubleshooting Guide
 
 ### Common Issues
 
-1. Plugin Not Executing:
-   - Verify that the plugin is correctly configured in the plugins array of your release.config.js.
-2. Authentication Errors:
-   - Ensure you’ve set the necessary environment variables (GITHUB_TOKEN, GITLAB_TOKEN, NPM_TOKEN).
+1. **Plugin Not Executing:**  
+   - Verify that the plugin is correctly configured as the first plugin in your semantic-release config.
+
+2. **Authentication Errors:**  
+   - Ensure you’ve set the necessary environment variables (`GITHUB_TOKEN`, `NPM_TOKEN`) in your CI environment.
+
+3. **Tag Conflicts:**  
+   - If you see errors about tags already existing, try deleting the conflicting tag on the remote or use `GIT_FETCH_EXTRA_ARGS` as shown above.
 
 ## Contributing
 
