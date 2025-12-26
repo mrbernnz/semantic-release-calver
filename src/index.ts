@@ -26,7 +26,7 @@ export const prepare = async (
     const lastVersion = context.lastRelease?.version;
     const versionManager = new VersionManager(pluginConfig.versionFormat);
 
-    if (!versionManager.isValidVersion(lastVersion)) {
+    if (lastVersion && !versionManager.isValidVersion(lastVersion)) {
       throw new SemanticReleaseError(
         'Invalid Version Format',
         'EINVALIDVERSION',
