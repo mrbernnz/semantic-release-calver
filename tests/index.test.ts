@@ -1,9 +1,9 @@
 import SemanticReleaseError from '@semantic-release/error';
 import {Signale} from 'signale';
-import {generateNotes, prepare} from '../src/index';
-import {GenerateNotesContext, PluginConfig, PrepareContext} from '../src/types';
+import {generateNotes, verifyRelease} from '../src/index';
+import {GenerateNotesContext, PluginConfig, VerifyReleaseContext} from '../src/types';
 
-type Context = GenerateNotesContext | PrepareContext;
+type Context = GenerateNotesContext | VerifyReleaseContext;
 
 describe('Calver Plugin', () => {
   let mockLogger: jest.Mocked<Signale<'error' | 'success' | 'warn' | 'log'>>;
@@ -82,14 +82,14 @@ describe('Calver Plugin', () => {
     });
   });
 
-  describe('prepare function', () => {
+  describe('verifyRelease function', () => {
     const date = new Date();
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
 
     describe('with default version format', () => {
       it('should sets next version correctly', async () => {
-        await prepare(mockPluginConfig, mockContext);
+        await verifyRelease(mockPluginConfig, mockContext);
 
         const re = new RegExp(`${year}\.${month}([_.]\\d+)?$`);
 
@@ -100,7 +100,7 @@ describe('Calver Plugin', () => {
       it('should increment minor version for the same month', async () => {
         mockContext.lastRelease.version = `${year}.${month}.3`;
 
-        await prepare(mockPluginConfig, mockContext);
+        await verifyRelease(mockPluginConfig, mockContext);
 
         expect(mockContext.nextRelease.version).toBe(`${year}.${month}.4`);
       });
@@ -108,17 +108,28 @@ describe('Calver Plugin', () => {
       it('should reset minor version for a new month', async () => {
         mockContext.lastRelease.version = '2024.11.3';
 
-        await prepare(mockPluginConfig, mockContext);
+        await verifyRelease(mockPluginConfig, mockContext);
 
         const re = new RegExp(`${year}\.${month}.\\d{1}`);
 
         expect(mockContext.nextRelease.version).toMatch(re);
       });
 
+      it('should overwrite a SemVer default version set by semantic-release core (dry-run regression)', async () => {
+        mockContext.nextRelease.version = '1.0.0';
+
+        await verifyRelease(mockPluginConfig, mockContext);
+
+        const re = new RegExp(`${year}\.${month}([_.]\\d+)?$`);
+
+        expect(mockContext.nextRelease.version).not.toBe('1.0.0');
+        expect(mockContext.nextRelease.version).toMatch(re);
+      });
+
       it.skip.failing('should convert semver version', async () => {
         mockContext.lastRelease.version = '1.2.3';
 
-        await prepare(mockPluginConfig, mockContext);
+        await verifyRelease(mockPluginConfig, mockContext);
 
         const re = new RegExp(`${year}\.${month}([._]\\d+)?$`);
 
@@ -140,7 +151,7 @@ describe('Calver Plugin', () => {
           mockContext.lastRelease.version = version;
           const error = new SemanticReleaseError(errorMessage);
 
-          await expect(prepare(mockPluginConfig, mockContext)).rejects.toThrow({
+          await expect(verifyRelease(mockPluginConfig, mockContext)).rejects.toThrow({
             name: errorName,
             message: errorMessage
           });

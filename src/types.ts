@@ -9,7 +9,7 @@ export interface DetermineFormatArgs {
   versionFormat: VersionFormat;
 }
 
-export {GenerateNotesContext, PrepareContext} from 'semantic-release';
+export {GenerateNotesContext, VerifyReleaseContext} from 'semantic-release';
 
 export type VersionFormat = 'YYYY.0M.MICRO' | 'YYYY.0M_MICRO';
 
