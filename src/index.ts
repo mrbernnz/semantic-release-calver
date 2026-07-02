@@ -1,5 +1,5 @@
 import SemanticReleaseError from '@semantic-release/error';
-import {GenerateNotesContext, PluginConfig, PrepareContext} from './types';
+import {GenerateNotesContext, PluginConfig, VerifyReleaseContext} from './types';
 import {VersionManager} from './utils';
 
 /**
@@ -14,13 +14,15 @@ export const generateNotes = async (
 ): Promise<string | undefined> => context.nextRelease?.notes;
 
 /**
- * Prepares the next release by calculating the next version.
+ * Verifies and finalizes the next release version, overwriting the SemVer
+ * default with a CalVer version. Runs during `verifyRelease`, which
+ * semantic-release always executes (even in `--dry-run`), unlike `prepare`.
  * @param pluginConfig - Plugin configuration.
  * @param context - Plugin context containing release data.
  */
-export const prepare = async (
+export const verifyRelease = async (
   pluginConfig: PluginConfig = {versionFormat: 'YYYY.0M.MICRO'},
-  context: PrepareContext
+  context: VerifyReleaseContext
 ): Promise<void> => {
   try {
     const lastVersion = context.lastRelease?.version;
