@@ -126,7 +126,7 @@ describe('Calver Plugin', () => {
         expect(mockContext.nextRelease.version).toMatch(re);
       });
 
-      it.skip.failing('should convert semver version', async () => {
+      it('should convert semver version', async () => {
         mockContext.lastRelease.version = '1.2.3';
 
         await verifyRelease(mockPluginConfig, mockContext);

@@ -28,15 +28,22 @@ export const verifyRelease = async (
     const lastVersion = context.lastRelease?.version;
     const versionManager = new VersionManager(pluginConfig.versionFormat);
 
+    let calverBaseVersion: string | undefined = lastVersion;
+
     if (lastVersion && !versionManager.isValidVersion(lastVersion)) {
-      throw new SemanticReleaseError(
-        'Invalid Version Format',
-        'EINVALIDVERSION',
-        `The version "${lastVersion}" is not a valid SemVer or CalVer.`
-      );
+      if (!versionManager.isSemVer(lastVersion)) {
+        throw new SemanticReleaseError(
+          'Invalid Version Format',
+          'EINVALIDVERSION',
+          `The version "${lastVersion}" is not a valid SemVer or CalVer.`
+        );
+      }
+
+      context.logger.log(`Detected SemVer last release "${lastVersion}"; migrating to CalVer.`);
+      calverBaseVersion = undefined;
     }
 
-    const newVersion = versionManager.calculateNextVersion(lastVersion);
+    const newVersion = versionManager.calculateNextVersion(calverBaseVersion);
 
     if (context.nextRelease) {
       context.nextRelease.version = newVersion;
