@@ -42,6 +42,17 @@ export class VersionManager {
   }
 
   /**
+   * Determines whether a version string is a valid SemVer version, regardless
+   * of whether it is also CalVer-shaped. Used to detect a pre-existing SemVer
+   * release history that predates CalVer adoption.
+   * @param version - The version string to check.
+   * @returns `true` if valid SemVer, otherwise `false`.
+   */
+  isSemVer(version: string): boolean {
+    return semver.valid(version, {loose: true}) !== null;
+  }
+
+  /**
    * Calculates the next version following CalVer (i.e. YYYY.0M.MICRO).
    * @param lastVersion - The last version string (e.g., "2024.12.3").
    * @returns The next version string.
