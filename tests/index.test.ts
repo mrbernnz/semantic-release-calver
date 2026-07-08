@@ -43,6 +43,9 @@ describe('Calver Plugin', () => {
       versionFormat: 'YYYY.0M.MICRO'
     };
     mockContext = {
+      options: {
+        tagFormat: 'v${version}'
+      },
       lastRelease: {
         version: '2024.12.3',
         gitTag: '',
@@ -117,6 +120,8 @@ describe('Calver Plugin', () => {
 
       it('should overwrite a SemVer default version set by semantic-release core (dry-run regression)', async () => {
         mockContext.nextRelease.version = '1.0.0';
+        mockContext.nextRelease.gitTag = 'v1.0.0';
+        mockContext.nextRelease.name = 'v1.0.0';
 
         await verifyRelease(mockPluginConfig, mockContext);
 
@@ -124,6 +129,31 @@ describe('Calver Plugin', () => {
 
         expect(mockContext.nextRelease.version).not.toBe('1.0.0');
         expect(mockContext.nextRelease.version).toMatch(re);
+      });
+
+      it('should re-derive gitTag and name from the CalVer version', async () => {
+        mockContext.nextRelease.version = '1.0.0';
+        mockContext.nextRelease.gitTag = 'v1.0.0';
+        mockContext.nextRelease.name = 'v1.0.0';
+
+        await verifyRelease(mockPluginConfig, mockContext);
+
+        expect(mockContext.nextRelease.gitTag).toBe(`v${mockContext.nextRelease.version}`);
+        expect(mockContext.nextRelease.name).toBe(`v${mockContext.nextRelease.version}`);
+        expect(mockContext.nextRelease.gitTag).not.toBe('v1.0.0');
+        expect(mockContext.nextRelease.name).not.toBe('v1.0.0');
+      });
+
+      it('should respect a custom tagFormat', async () => {
+        mockContext.options.tagFormat = 'release-${version}';
+        mockContext.nextRelease.version = '1.0.0';
+        mockContext.nextRelease.gitTag = 'v1.0.0';
+        mockContext.nextRelease.name = 'v1.0.0';
+
+        await verifyRelease(mockPluginConfig, mockContext);
+
+        expect(mockContext.nextRelease.gitTag).toBe(`release-${mockContext.nextRelease.version}`);
+        expect(mockContext.nextRelease.name).toBe(`release-${mockContext.nextRelease.version}`);
       });
 
       it('should convert semver version', async () => {

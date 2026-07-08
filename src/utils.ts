@@ -1,6 +1,16 @@
 import semver from 'semver';
 import {DetermineFormatArgs, VersionFormat} from './types';
 
+/**
+ * Substitutes the `${version}` token in a semantic-release `tagFormat` string.
+ * @param tagFormat - The tag format (e.g. `v${version}`).
+ * @param version - The version to interpolate.
+ * @returns The formatted git tag.
+ */
+export function makeTag(tagFormat: string, version: string): string {
+  return tagFormat.replace(/\$\{version\}/g, version);
+}
+
 export class VersionManager {
   private versionFormat: VersionFormat;
 
