@@ -74,6 +74,30 @@ export class VersionManager {
   }
 
   /**
+   * Determines whether a version string is CalVer-shaped - i.e. its first two
+   * segments read as a plausible year and zero-padded month - even though it
+   * fails full `isValidVersion` validation (e.g. a missing MICRO segment).
+   * @param version - The version string to check.
+   * @returns `true` if the leading segments look like YYYY and 0M, otherwise `false`.
+   */
+  isCalVerShaped(version: string): boolean {
+    const [yearStr, monthStr] = this.getVersionSegments(version);
+    if (!yearStr || !monthStr) return false;
+
+    const year = Number(yearStr);
+    if (!/^\d+$/.test(yearStr) || Number.isNaN(year) || year < 2000 || year > new Date().getFullYear()) {
+      return false;
+    }
+
+    const month = Number(monthStr);
+    if (!/^\d{2}$/.test(monthStr) || Number.isNaN(month) || month < 1 || month > 12) {
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Calculates the next version following CalVer (i.e. YYYY.0M.MICRO).
    * @param lastVersion - The last version string (e.g., "2024.12.3").
    * @returns The next version string.

@@ -169,7 +169,7 @@ describe('Calver Plugin', () => {
     });
 
     describe('with an invalid version', () => {
-      test.skip.failing.each`
+      test.each`
         version                     | errorName                 | errorMessage
         ${'random-string'}          | ${'SemanticReleaseError'} | ${'Invalid Version Format'}
         ${'random.invalid.version'} | ${'SemanticReleaseError'} | ${'Invalid Version Format'}
