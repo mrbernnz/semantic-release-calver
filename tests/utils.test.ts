@@ -50,10 +50,10 @@ describe('CalVer Plugin Utils', () => {
 
   describe('makeTag', () => {
     it.each`
-      tagFormat            | version        | expected
-      ${'v${version}'}     | ${'2025.02.1'} | ${'v2025.02.1'}
-      ${'release-${version}'} | ${'2025.02.1'} | ${'release-2025.02.1'}
-      ${'app/v${version}-final'} | ${'2025.02.1'} | ${'app/v2025.02.1-final'}
+      tagFormat                    | version        | expected
+      ${'v${version}'}             | ${'2025.02.1'} | ${'v2025.02.1'}
+      ${'release-${version}'}      | ${'2025.02.1'} | ${'release-2025.02.1'}
+      ${'app/v${version}-final'}   | ${'2025.02.1'} | ${'app/v2025.02.1-final'}
     `('should format "$tagFormat" with version "$version" as "$expected"', ({tagFormat, version, expected}) => {
       expect(makeTag(tagFormat, version)).toBe(expected);
     });

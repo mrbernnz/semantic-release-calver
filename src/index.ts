@@ -1,6 +1,6 @@
 import SemanticReleaseError from '@semantic-release/error';
 import {GenerateNotesContext, PluginConfig, VerifyReleaseContext} from './types';
-import {makeTag, VersionManager} from './utils';
+import {DEFAULT_TAG_FORMAT, makeTag, VersionManager} from './utils';
 
 /**
  * Generates release notes from the context.
@@ -47,7 +47,7 @@ export const verifyRelease = async (
 
     if (context.nextRelease) {
       context.nextRelease.version = newVersion;
-      context.nextRelease.gitTag = makeTag(context.options.tagFormat ?? 'v${version}', newVersion);
+      context.nextRelease.gitTag = makeTag(context.options.tagFormat ?? DEFAULT_TAG_FORMAT, newVersion);
       context.nextRelease.name = context.nextRelease.gitTag;
       context.logger.log(`CalVer calculated: ${newVersion}`);
     }
