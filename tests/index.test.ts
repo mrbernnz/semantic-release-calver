@@ -1,43 +1,18 @@
 import SemanticReleaseError from '@semantic-release/error';
-import {Signale} from 'signale';
 import {generateNotes, verifyRelease} from '../src/index';
-import {GenerateNotesContext, PluginConfig, VerifyReleaseContext} from '../src/types';
+import {GenerateNotesContext, Logger, PluginConfig, VerifyReleaseContext} from '../src/types';
 
 type Context = GenerateNotesContext | VerifyReleaseContext;
 
 describe('Calver Plugin', () => {
-  let mockLogger: jest.Mocked<Signale<'error' | 'success' | 'warn' | 'log'>>;
+  let mockLogger: jest.Mocked<Logger>;
   let mockPluginConfig: PluginConfig;
   let mockContext: Context;
 
   beforeEach(() => {
     mockLogger = {
       log: jest.fn(),
-      error: jest.fn(),
-      success: jest.fn(),
-      warn: jest.fn(),
-      config: jest.fn().mockReturnThis(),
-      scope: jest.fn().mockReturnThis(),
-      unscope: jest.fn().mockReturnThis(),
-      time: jest.fn(),
-      timeEnd: jest.fn(),
-      start: jest.fn(),
-      pause: jest.fn(),
-      complete: jest.fn(),
-      fatal: jest.fn(),
-      info: jest.fn(),
-      note: jest.fn(),
-      debug: jest.fn(),
-      await: jest.fn(),
-      star: jest.fn(),
-      watch: jest.fn(),
-      pending: jest.fn(),
-      disable: jest.fn(),
-      enable: jest.fn(),
-      isEnabled: jest.fn(),
-      addSecrets: jest.fn(),
-      clearSecrets: jest.fn(),
-      fav: jest.fn()
+      error: jest.fn()
     };
     mockPluginConfig = {
       versionFormat: 'YYYY.0M.MICRO'
@@ -47,34 +22,15 @@ describe('Calver Plugin', () => {
         tagFormat: 'v${version}'
       },
       lastRelease: {
-        version: '2024.12.3',
-        gitTag: '',
-        channels: [],
-        gitHead: '',
-        name: ''
+        version: '2024.12.3'
       },
       nextRelease: {
         notes: 'Release notes',
         version: '',
-        type: 'minor',
-        channel: '',
         gitTag: '',
-        gitHead: '',
         name: ''
       },
-      logger: mockLogger,
-      commits: [],
-      releases: [],
-      env: {},
-      envCi: {
-        isCi: true,
-        commit: '',
-        branch: 'main'
-      },
-      branch: {name: ''},
-      branches: [],
-      stdout: process.stdout,
-      stderr: process.stderr
+      logger: mockLogger
     };
   });
 

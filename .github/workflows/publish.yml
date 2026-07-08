@@ -53,6 +53,62 @@ jobs:
         if: failure()
         run: echo "Unit tests failed for Node.js ${{ matrix.node-version }}"
 
+  peer_compat_versions:
+    name: Resolve Peer Compatibility Matrix
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.resolve.outputs.versions }}
+    steps:
+      - name: Resolve latest published semantic-release version
+        id: resolve
+        run: |
+          LATEST=$(npm view semantic-release version)
+          echo "versions=[\"19.0.0\",\"22.0.12\",\"$LATEST\"]" >> "$GITHUB_OUTPUT"
+
+  peer_compat:
+    name: Peer Compatibility (semantic-release ${{ matrix.semantic-release-version }})
+    runs-on: ubuntu-latest
+    needs: [peer_compat_versions]
+
+    strategy:
+      fail-fast: false
+      matrix:
+        semantic-release-version: ${{ fromJson(needs.peer_compat_versions.outputs.versions) }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20.x
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+        env:
+          CI: true
+
+      # --legacy-peer-deps: other devDependencies (e.g. @semantic-release/github,
+      # @semantic-release/npm) declare peers on newer semantic-release versions.
+      # This leg is only exercising this plugin against the overridden version,
+      # not those unrelated devDependencies, so their peer conflicts are expected noise.
+      - name: Override semantic-release to ${{ matrix.semantic-release-version }}
+        run: npm install --no-save --legacy-peer-deps semantic-release@${{ matrix.semantic-release-version }}
+
+      - name: Build
+        run: npm run build
+
+      # Note: unit tests are intentionally NOT run here. tests/index.test.ts
+      # exercises src/index.ts against hand-built mock objects and never
+      # imports 'semantic-release' — its outcome can't vary by peer version.
+      # Unit test coverage across Node versions already lives in the
+      # `unit_tests` job above.
+      - name: Run Peer Compatibility Integration Check
+        run: npm run verify:peer-compat
+        continue-on-error: true # Expected to fail until PRO-54's verifyRelease-mutation follow-up lands — see README "Known Limitations".
+
   release:
     name: Release
     runs-on: ubuntu-latest
