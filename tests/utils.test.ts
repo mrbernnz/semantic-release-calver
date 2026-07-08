@@ -29,6 +29,22 @@ describe('CalVer Plugin Utils', () => {
     });
   });
 
+  describe('isCalVerShaped', () => {
+    it.each`
+      version                     | expected
+      ${''}                       | ${false}
+      ${'random-string'}          | ${false}
+      ${'random.invalid.version'} | ${false}
+      ${'24.11'}                  | ${false}
+      ${'2024.11'}                | ${true}
+      ${'2024.11.3'}              | ${true}
+      ${'2024.11.abc'}            | ${true}
+      ${'1999.11'}                | ${false}
+    `('should evaluate "$version" as CalVer-shaped: "$expected"', async ({version, expected}) => {
+      expect(versionManager.isCalVerShaped(version)).toEqual(expected);
+    });
+  });
+
   describe('determineFormat', () => {
     const formattedDate = versionManager['getFormattedDate']();
 

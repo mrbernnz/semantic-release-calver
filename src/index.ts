@@ -31,16 +31,22 @@ export const verifyRelease = async (
     let calverBaseVersion: string | undefined = lastVersion;
 
     if (lastVersion && !versionManager.isValidVersion(lastVersion)) {
-      if (!versionManager.isSemVer(lastVersion)) {
+      if (versionManager.isSemVer(lastVersion)) {
+        context.logger.log(`Detected SemVer last release "${lastVersion}"; migrating to CalVer.`);
+        calverBaseVersion = undefined;
+      } else if (versionManager.isCalVerShaped(lastVersion)) {
+        throw new SemanticReleaseError(
+          'Invalid CalVer Format',
+          'EINVALIDCALVER',
+          `The version "${lastVersion}" looks like CalVer but does not match the expected "${pluginConfig.versionFormat}" pattern.`
+        );
+      } else {
         throw new SemanticReleaseError(
           'Invalid Version Format',
           'EINVALIDVERSION',
           `The version "${lastVersion}" is not a valid SemVer or CalVer.`
         );
       }
-
-      context.logger.log(`Detected SemVer last release "${lastVersion}"; migrating to CalVer.`);
-      calverBaseVersion = undefined;
     }
 
     const newVersion = versionManager.calculateNextVersion(calverBaseVersion);
