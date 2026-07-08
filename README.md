@@ -139,6 +139,16 @@ jobs:
 3. **Tag Conflicts:**  
    - If you see errors about tags already existing, try deleting the conflicting tag on the remote or use `GIT_FETCH_EXTRA_ARGS` as shown above.
 
+## Known Limitations
+
+`verifyRelease`'s override of the computed version is currently **not effective** against real
+semantic-release: semantic-release deep-clones the plugin context before invoking `verifyRelease`
+and discards its return value, so no plugin can influence the final `nextRelease.version` from this
+lifecycle hook. This is tracked as a follow-up (see `verify:peer-compat` in CI, which surfaces this
+as a non-blocking, expected failure) and needs a dedicated redesign — likely bypassing
+semantic-release's built-in version computation entirely. See semantic-release/semantic-release#3368
+for the closed-without-resolution upstream feature request asking for this same capability.
+
 ## Contributing
 
 Contributions are welcome to semantic-release-calver! Please follow these steps:
