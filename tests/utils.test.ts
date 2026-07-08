@@ -1,4 +1,4 @@
-import {VersionManager} from '../src/utils';
+import {VersionManager, makeTag} from '../src/utils';
 
 describe('CalVer Plugin Utils', () => {
   const versionManager = new VersionManager('YYYY.0M.MICRO');
@@ -46,6 +46,17 @@ describe('CalVer Plugin Utils', () => {
         ).toBe(expected);
       }
     );
+  });
+
+  describe('makeTag', () => {
+    it.each`
+      tagFormat                    | version        | expected
+      ${'v${version}'}             | ${'2025.02.1'} | ${'v2025.02.1'}
+      ${'release-${version}'}      | ${'2025.02.1'} | ${'release-2025.02.1'}
+      ${'app/v${version}-final'}   | ${'2025.02.1'} | ${'app/v2025.02.1-final'}
+    `('should format "$tagFormat" with version "$version" as "$expected"', ({tagFormat, version, expected}) => {
+      expect(makeTag(tagFormat, version)).toBe(expected);
+    });
   });
 
   describe('getVersionSegments', () => {

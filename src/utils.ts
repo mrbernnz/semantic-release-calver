@@ -1,6 +1,27 @@
 import semver from 'semver';
 import {DetermineFormatArgs, VersionFormat} from './types';
 
+/**
+ * semantic-release's own default `tagFormat`, used when `context.options.tagFormat`
+ * is not set. Mirrors the default in semantic-release's `get-config.js`.
+ */
+export const DEFAULT_TAG_FORMAT = 'v${version}';
+
+/**
+ * Substitutes the `${version}` token in a semantic-release `tagFormat` string.
+ *
+ * Unlike semantic-release's own `makeTag` (which compiles `tagFormat` as a
+ * lodash template), this only replaces the literal `${version}` placeholder —
+ * it does not support lodash/ERB-style delimiters (e.g. `<%= version %>`) or
+ * expressions inside the placeholder.
+ * @param tagFormat - The tag format (e.g. `v${version}`).
+ * @param version - The version to interpolate.
+ * @returns The formatted git tag.
+ */
+export function makeTag(tagFormat: string, version: string): string {
+  return tagFormat.replace(/\$\{version\}/g, version);
+}
+
 export class VersionManager {
   private versionFormat: VersionFormat;
 
